@@ -5,7 +5,7 @@ CREATE_TUSER = '''CREATE TABLE tuser (
                     user_id TEXT NOT NULL,
                     first_name TEXT,
                     last_name TEXT,
-                    is_subscribe INTEGER DEFAULT (1) NOT NULL),
+                    is_subscribe INTEGER DEFAULT (1) NOT NULL,
                     create_date INTEGER NOT NULL
                     );'''
 
