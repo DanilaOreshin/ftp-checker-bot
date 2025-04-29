@@ -1,2 +1,2 @@
 @echo off
-cmd /k "db_migration.py"
+cmd /k "venv\Scripts\activate.bat & py db_migration.py"

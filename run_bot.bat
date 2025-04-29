@@ -1,2 +1,2 @@
 @echo off
-cmd /k "py main.py"
+cmd /k "venv\Scripts\activate.bat & py main.py"
