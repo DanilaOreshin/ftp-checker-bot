@@ -45,7 +45,6 @@ async def clear_old_messages(bot: Bot):
 async def check_ftp_files_for_all(bot: Bot):
     logger.info(f'search files on dir')
     files_list = [i for i in fm.get_files_list() if cfg.FTP_FILE_EXTENSION in i]
-    files_list = ["test"]
     if not files_list:
         logger.info(f'files not found')
         return
