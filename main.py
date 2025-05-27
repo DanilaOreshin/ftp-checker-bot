@@ -1,20 +1,21 @@
 import asyncio
 
 from aiogram import Bot, Dispatcher, F
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-import core.config.config as cfg
-import core.handlers.basic_handlers as bh
-import core.handlers.command_handlers as ch
-import core.handlers.message_handlers as mh
-from core.config.config import bot_settings
-from core.config.menu_config import set_commands
-from core.filters.check_user import IsUnregisteredUser
-from core.middlewares.middleware_scheduler import MiddlewareScheduler
-from core.utils.callback_entity_data import CallbackEntityData
-from core.utils.functions import clear_old_messages, check_ftp_files_for_all
-from core.utils.states import RegistrationStates
+import src.handlers.basic_handlers as bh
+import src.handlers.command_handlers as ch
+import src.handlers.message_handlers as mh
+from src.config.bot_settings import settings as cfg
+from src.config.menu_config import set_commands
+from src.filters.check_user import IsUnregisteredUser
+from src.middlewares.middleware_scheduler import MiddlewareScheduler
+from src.utils import functions as f
+from src.utils.callback_entity_data import CallbackEntityData
+from src.utils.states import RegistrationStates
 
 
 async def start_bot(bot: Bot):
@@ -22,19 +23,19 @@ async def start_bot(bot: Bot):
 
 
 async def start():
-    bot = Bot(token=bot_settings.token)
+    bot = Bot(token=cfg.BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
     dp = Dispatcher()
 
     scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
 
-    scheduler.add_job(clear_old_messages,
+    scheduler.add_job(f.clear_old_messages,
                       trigger='interval',
-                      hours=cfg.CLEAR_MSG_INTERVAL_HOURS,
+                      hours=cfg.INTERVAL_CLEAR_MSG_HOURS,
                       kwargs={'bot': bot})
-    scheduler.add_job(check_ftp_files_for_all,
+    scheduler.add_job(f.check_ftp_files_for_all,
                       trigger='interval',
-                      minutes=cfg.CHECK_FILES_INTERVAL_MINS,
+                      minutes=cfg.INTERVAL_CHECK_FILES_MINUTES,
                       kwargs={'bot': bot})
 
     scheduler.start()

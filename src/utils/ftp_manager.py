@@ -1,6 +1,6 @@
 from ftplib import FTP
 
-import core.config.config as cfg
+from src.config.bot_settings import settings as cfg
 
 
 def ftp_connect() -> FTP():

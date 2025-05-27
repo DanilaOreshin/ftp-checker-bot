@@ -1,6 +1,6 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
-from core.keyboards.button import Button
+from src.keyboards.button import Button
 
 
 def get_inline_keyboard(buttons: [Button]) -> InlineKeyboardBuilder:
