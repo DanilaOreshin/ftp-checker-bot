@@ -73,9 +73,9 @@ def select_messages_query(chat_id: int) -> TextClause:
     return text(query).bindparams(chat_id=chat_id)
 
 
-def delete_messages_by_chat_id_query(chat_id: int) -> TextClause:
-    query = '''DELETE FROM db_ftp_checker.tmessage WHERE chat_id = :chat_id;'''
-    return text(query).bindparams(chat_id=chat_id)
+# def delete_messages_by_chat_id_query(chat_id: int) -> TextClause:
+#     query = '''DELETE FROM db_ftp_checker.tmessage WHERE chat_id = :chat_id;'''
+#     return text(query).bindparams(chat_id=chat_id)
 
 
 def select_old_messages_query(interval: str) -> TextClause:
