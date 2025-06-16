@@ -10,6 +10,14 @@ from src.config.bot_settings import settings as cfg
 from src.utils.logger import logger
 
 
+async def delete_message_from_tg(bot: Bot, chat_id: int, message_id: int):
+    try:
+        await bot.delete_message(chat_id=chat_id, message_id=message_id)
+        logger.info(f'old message {message_id} was deleted from tg')
+    except exceptions.TelegramBadRequest as ex:
+        logger.error(f'chat_id = {chat_id}, message_id = {message_id}: {ex}')
+
+
 async def clear_chat(bot: Bot, chat_id: int):
     # select array of message_id from db
     result = await db.sql_select(db.select_messages_query(chat_id))
@@ -18,8 +26,9 @@ async def clear_chat(bot: Bot, chat_id: int):
         message_ids.append(row[0])
     # delete messages from chat and db
     if message_ids:
-        await bot.delete_messages(chat_id=chat_id, message_ids=message_ids)
-        await db.sql_modify(db.delete_messages_by_chat_id_query(chat_id))
+        for message_id in message_ids:
+            await delete_message_from_tg(bot, chat_id, message_id)
+        await db.sql_modify(db.delete_messages_by_message_ids_query(message_ids))
 
 
 async def clear_old_messages(bot: Bot):
@@ -32,11 +41,7 @@ async def clear_old_messages(bot: Bot):
     for row in result:
         chat_id = row[0]
         message_id = row[1]
-        try:
-            await bot.delete_message(chat_id=chat_id, message_id=message_id)
-            logger.info(f'old message message_id was deleted from tg')
-        except exceptions.TelegramBadRequest as ex:
-            logger.error(f'chat_id = {chat_id}, message_id = {message_id}: {ex}')
+        await delete_message_from_tg(bot, chat_id, message_id)
         message_ids.append(row[1])
     await db.sql_modify(db.delete_messages_by_message_ids_query(message_ids))
     logger.info(f'old messages ({message_ids}) was deleted from db')
