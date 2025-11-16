@@ -2,12 +2,17 @@ from aiogram.types import Message
 from sqlalchemy import text, TextClause
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from src.config.bot_settings import settings as cfg
+from src.config.bot_config import config as cfg
 
 async_engine = create_async_engine(url=cfg.DATABASE_URL,
                                    echo=False,
                                    pool_size=10,
-                                   max_overflow=5)
+                                   max_overflow=5,
+                                   connect_args={
+                                       "server_settings": {
+                                           "TimeZone": "Europe/Moscow"
+                                       }
+                                   })
 
 
 async def sql_modify(statement: TextClause):
@@ -31,12 +36,9 @@ def check_exists_user_query(user_id: int) -> TextClause:
     return text(query).bindparams(user_id=user_id)
 
 
-def insert_user_query(user_id: int, first_name: str, last_name: str) -> TextClause:
-    query = '''INSERT INTO db_ftp_checker.tuser(user_id, first_name, last_name) 
-                VALUES (:user_id, :first_name, :last_name);'''
-    return text(query).bindparams(user_id=user_id,
-                                  first_name=first_name,
-                                  last_name=last_name)
+def insert_user_query(user_id: int, user_first_name: str, user_last_name: str) -> TextClause:
+    query = '''INSERT INTO db_ftp_checker.tuser(user_id, first_name, last_name) VALUES (:user_id, :first_name, :last_name);'''
+    return text(query).bindparams(user_id=user_id, first_name=user_first_name, last_name=user_last_name)
 
 
 def select_subscribed_users_query():
@@ -49,15 +51,13 @@ def select_all_users_query():
     return text(query)
 
 
-def select_sub_user_query(user_id: int):
+def select_subscribe_by_user_query(user_id: int):
     query = '''SELECT tu.is_subscribe FROM db_ftp_checker.tuser tu WHERE tu.user_id = :user_id;'''
     return text(query).bindparams(user_id=user_id)
 
 
-def update_subscribe_query(user_id: int, is_subscribe: int):
-    query = '''UPDATE db_ftp_checker.tuser
-                SET is_subscribe = :is_subscribe
-                WHERE user_id = :user_id;'''
+def update_subscribe_query(user_id: int, is_subscribe: bool):
+    query = '''UPDATE db_ftp_checker.tuser SET is_subscribe = :is_subscribe WHERE user_id = :user_id;'''
     return text(query).bindparams(is_subscribe=is_subscribe,
                                   user_id=user_id)
 
@@ -71,11 +71,6 @@ def insert_message_query(message_id: int, chat_id: int) -> TextClause:
 def select_messages_query(chat_id: int) -> TextClause:
     query = '''SELECT tm.message_id FROM db_ftp_checker.tmessage tm WHERE tm.chat_id = :chat_id;'''
     return text(query).bindparams(chat_id=chat_id)
-
-
-# def delete_messages_by_chat_id_query(chat_id: int) -> TextClause:
-#     query = '''DELETE FROM db_ftp_checker.tmessage WHERE chat_id = :chat_id;'''
-#     return text(query).bindparams(chat_id=chat_id)
 
 
 def select_old_messages_query(interval: str) -> TextClause:

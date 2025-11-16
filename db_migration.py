@@ -2,7 +2,8 @@ import asyncio
 
 from sqlalchemy import text
 
-import src.utils.db_manager as db
+import src.services.db_manager as db
+from src.config.bot_config import config as cfg
 
 CREATE_TUSER = '''CREATE TABLE db_ftp_checker.tuser (
     id bigserial NOT NULL,
@@ -16,6 +17,9 @@ CREATE_TUSER = '''CREATE TABLE db_ftp_checker.tuser (
 );'''
 
 CREATE_TUSER_USER_ID_INDEX = '''CREATE INDEX idx_tuser_user_id ON db_ftp_checker.tuser USING btree (user_id);'''
+
+INSERT_ADMIN = f'''INSERT INTO db_ftp_checker.tuser(user_id, first_name, last_name)
+                   VALUES({cfg.BOT_ADMIN_ID}, 'admin', 'admin');'''
 
 CREATE_TMESSAGE = '''CREATE TABLE db_ftp_checker.tmessage (
     id bigserial NOT NULL,
@@ -32,6 +36,7 @@ CREATE_TMESSAGE_CHAT_ID_INDEX = '''CREATE INDEX idx_tmessage_chat_id ON db_ftp_c
 async def migrate():
     await db.sql_modify(text(CREATE_TUSER))
     await db.sql_modify(text(CREATE_TUSER_USER_ID_INDEX))
+    await db.sql_modify(text(INSERT_ADMIN))
     await db.sql_modify(text(CREATE_TMESSAGE))
     await db.sql_modify(text(CREATE_TMESSAGE_CHAT_ID_INDEX))
 

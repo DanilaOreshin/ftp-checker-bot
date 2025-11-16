@@ -5,8 +5,8 @@ from aiogram.types.base import TelegramObject
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 
-class MiddlewareScheduler(BaseMiddleware):
-    def __init__(self, scheduler: AsyncIOScheduler):
+class SchedulerMiddleware(BaseMiddleware):
+    def __init__(self, scheduler: AsyncIOScheduler) -> None:
         self.scheduler = scheduler
 
     async def __call__(self,

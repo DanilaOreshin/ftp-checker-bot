@@ -9,13 +9,15 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import src.handlers.basic_handlers as bh
 import src.handlers.command_handlers as ch
 import src.handlers.message_handlers as mh
-from src.config.bot_settings import settings as cfg
+from src.config.bot_config import config as cfg
 from src.config.menu_config import set_commands
-from src.filters.check_user import IsUnregisteredUser
-from src.middlewares.middleware_scheduler import MiddlewareScheduler
-from src.utils import functions as f
-from src.utils.callback_entity_data import CallbackEntityData
-from src.utils.states import RegistrationStates
+from src.entity.action_data import ActionData
+from src.entity.states import RegistrationStates
+from src.filters.check_user_filter import IsUnregisteredUser, IsAdminUser
+from src.middlewares.save_messages_middleware import SaveMessagesMiddleware
+from src.middlewares.scheduler_middleware import SchedulerMiddleware
+from src.services.ftp_manager import check_ftp_files_for_all
+from src.services.message_manager import clear_old_messages
 
 
 async def start_bot(bot: Bot):
@@ -29,39 +31,43 @@ async def start():
 
     scheduler = AsyncIOScheduler(timezone='Europe/Moscow')
 
-    scheduler.add_job(f.clear_old_messages,
+    scheduler.add_job(clear_old_messages,
                       trigger='interval',
                       hours=cfg.INTERVAL_CLEAR_MSG_HOURS,
                       kwargs={'bot': bot})
-    scheduler.add_job(f.check_ftp_files_for_all,
+    scheduler.add_job(check_ftp_files_for_all,
                       trigger='interval',
                       minutes=cfg.INTERVAL_CHECK_FILES_MINUTES,
                       kwargs={'bot': bot})
 
     scheduler.start()
-    dp.update.middleware.register(MiddlewareScheduler(scheduler))
+    dp.update.middleware.register(SchedulerMiddleware(scheduler))
+    dp.message.middleware(SaveMessagesMiddleware())
 
-    # add /start and /about commands to menu
+    # add commands to menu
     dp.startup.register(start_bot)
 
-    # command handlers
     dp.message.register(ch.start_command_handler, Command(commands=['start']))
-    dp.message.register(ch.about_command_handler, Command(commands=['about']))
-    dp.message.register(ch.send_alert_command_handler, Command(commands=['send_alert']))
 
-    dp.callback_query.register(mh.cancel_handler, F.data == 'cancel_action')
-    dp.message.register(mh.end_register_handler, RegistrationStates.PASSWORD_TYPING)
-    dp.callback_query.register(mh.switch_subscribe_handler, CallbackEntityData.filter(F.action == 'switch_subscribe'))
+    dp.message.register(mh.waiting_handler, RegistrationStates.WAITING)
 
     # valid user check
     dp.message.register(bh.wrong_user_handler, IsUnregisteredUser())
 
-    # reply menu handlers
-    dp.message.register(mh.get_dir_status_handler, F.text == '🔍Проверить сейчас')
-    dp.message.register(mh.send_subscribe_prefs_handler, F.text == '⚙️Управление подпиской')
+    # command handlers
+    dp.message.register(ch.help_command_handler, Command(commands=['help']))
+    dp.message.register(ch.about_command_handler, Command(commands=['about']))
+    dp.message.register(ch.alert_command_handler, Command(commands=['alert']), IsAdminUser())
 
-    # callback handlers
-    dp.callback_query.register(mh.start_register_handler, F.data == 'register')
+    dp.callback_query.register(mh.request_access_handler, ActionData.filter(F.action == 'register'))
+    dp.callback_query.register(mh.accept_access_handler, ActionData.filter(F.action == 'accept_request'))
+    dp.callback_query.register(mh.decline_access_handler, ActionData.filter(F.action == 'decline_request'))
+
+    dp.callback_query.register(mh.switch_subscribe_handler, ActionData.filter(F.action == 'switch_subscribe'))
+
+    # reply menu handlers
+    dp.message.register(mh.manual_check_handler, F.text == '🔍Проверить сейчас')
+    dp.message.register(mh.current_settings_handler, F.text == '⚙️Управление подпиской')
 
     # default handlers
     dp.message.register(bh.default_handler)

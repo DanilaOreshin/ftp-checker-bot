@@ -3,7 +3,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 from src.keyboards.button import Button
 
 
-def get_inline_keyboard(buttons: [Button]) -> InlineKeyboardBuilder:
+def get_inline_keyboard(buttons: list[Button]) -> InlineKeyboardBuilder:
     builder = InlineKeyboardBuilder()
     for b in buttons:
         builder.button(text=b.text, callback_data=b.callback_data)
@@ -11,7 +11,7 @@ def get_inline_keyboard(buttons: [Button]) -> InlineKeyboardBuilder:
     return builder
 
 
-def get_reply_keyboard(buttons: [Button]) -> ReplyKeyboardBuilder:
+def get_reply_keyboard(buttons: list[Button]) -> ReplyKeyboardBuilder:
     builder = ReplyKeyboardBuilder()
     for b in buttons:
         builder.button(text=b.text, callback_data=b.callback_data)
