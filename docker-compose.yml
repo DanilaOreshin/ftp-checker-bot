@@ -1,0 +1,37 @@
+services:
+  ftp-checker-bot:
+    build: .
+    image: ftp-checker-bot:latest
+    container_name: ftp-checker-bot
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+    environment:
+      - BOT_DEVELOPER=BOT_DEVELOPER
+      - BOT_VERSION=BOT_VERSION
+      - BOT_TOKEN=BOT_TOKEN
+      - BOT_ADMIN_ID=BOT_ADMIN_ID
+
+      - DB_USER=DB_USER
+      - DB_PASSWORD=DB_PASSWORD
+      - DB_HOST=DB_HOST
+      - DB_PORT=DB_PORT
+      - DB_NAME=DB_NAME
+
+      - INTERVAL_CLEAR_MSG_HOURS=INTERVAL_CLEAR_MSG_HOURS
+      - INTERVAL_CHECK_FILES_MINUTES=INTERVAL_CHECK_FILES_MINUTES
+      - INTERVAL_OLD_MSG_PERIOD=INTERVAL_OLD_MSG_PERIOD
+
+      - FTP_HOST=FTP_HOST
+      - FTP_PORT=FTP_PORT
+      - FTP_USER=FTP_USER
+      - FTP_PASSWORD=FTP_PASSWORD
+      - FTP_DIR_NAME=FTP_DIR_NAME
+      - FTP_FILE_EXTENSION=FTP_FILE_EXTENSION
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    external: true
