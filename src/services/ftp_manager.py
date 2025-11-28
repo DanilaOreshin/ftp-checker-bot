@@ -41,7 +41,7 @@ async def check_ftp_files_for_all(bot: Bot):
             logger.error(f'user_id = {user_id}: {ex}')
 
 
-def get_message_text_with_files() -> str:
+def get_message_text_with_files() -> str | None:
     raw_files_list = get_files_list()
     expected_files_list = [i for i in raw_files_list if cfg.FTP_FILE_EXTENSION in i]
-    return f"{m.HAS_FILES}🔸 {'\n🔸 '.join(expected_files_list)}" if expected_files_list else m.NO_FILES
+    return f"{m.HAS_FILES}🔸 {'\n🔸 '.join(expected_files_list)}" if expected_files_list else None

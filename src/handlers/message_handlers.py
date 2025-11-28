@@ -49,7 +49,8 @@ async def decline_access_handler(call: CallbackQuery, callback_data: ActionData,
 
 
 async def manual_check_handler(message: Message):
-    text = get_message_text_with_files()
+    files_list_str = get_message_text_with_files()
+    text = files_list_str if files_list_str else m.NO_FILES
     await send_message_answer(message, text)
 
 
