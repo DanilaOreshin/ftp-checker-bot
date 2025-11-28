@@ -14,7 +14,6 @@ class BotConfig:
         self.BOT_VERSION = self._get_required('BOT_VERSION')
 
         self.DB_HOST = self._get_required('DB_HOST')
-        self.DB_PORT = self._get_required('DB_PORT')
         self.DB_USER = self._get_required("DB_USER")
         self.DB_PASSWORD = self._get_required('DB_PASSWORD')
         self.DB_NAME = self._get_required("DB_NAME")
@@ -33,7 +32,7 @@ class BotConfig:
     @property
     def DATABASE_URL(self) -> str:
         # postgresql+asyncpg://postgres:postgres@localhost:5432/postgres
-        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}/{self.DB_NAME}"
 
     @staticmethod
     def _get_required(key: str) -> str:
